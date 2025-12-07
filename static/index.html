@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go Fiber Code Service Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .api-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .output {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+            min-height: 50px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .error {
+            border-left-color: #e74c3c;
+            color: #c0392b;
+        }
+        .success {
+            border-left-color: #27ae60;
+            color: #229954;
+        }
+        .label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Go Fiber Code Service Tester</h1>
+        
+        <div class="api-section">
+            <h2>1. Run Code API</h2>
+            <label class="label">Enter Code:</label>
+            <textarea id="runCode" placeholder="console.log('Hello World')"></textarea>
+            <button onclick="runCode()">Run Code</button>
+            <div id="runOutput" class="output">Output will appear here...</div>
+        </div>
+
+        <div class="api-section">
+            <h2>2. Auto-Fix API</h2>
+            <label class="label">Enter Code to Fix:</label>
+            <textarea id="fixCode" placeholder="let x = 10
+console.log(x)"></textarea>
+            <button onclick="autoFix()">Auto-Fix Code</button>
+            <div id="fixOutput" class="output">Fixed code will appear here...</div>
+        </div>
+
+        <div class="api-section">
+            <h2>3. Help API</h2>
+            <label class="label">Enter Query:</label>
+            <input type="text" id="helpQuery" placeholder="How do I use loops?">
+            <button onclick="getHelp()">Get Help</button>
+            <div id="helpOutput" class="output">Help response will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        async function runCode() {
+            const code = document.getElementById('runCode').value;
+            const output = document.getElementById('runOutput');
+            
+            if (!code.trim()) {
+                output.className = 'output error';
+                output.textContent = 'Please enter some code';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/run`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: code })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    output.className = 'output error';
+                    output.textContent = `Error: ${data.error}`;
+                } else {
+                    output.className = 'output success';
+                    output.textContent = data.output;
+                }
+            } catch (error) {
+                output.className = 'output error';
+                output.textContent = `Request failed: ${error.message}`;
+            }
+        }
+
+        async function autoFix() {
+            const code = document.getElementById('fixCode').value;
+            const output = document.getElementById('fixOutput');
+            
+            if (!code.trim()) {
+                output.className = 'output error';
+                output.textContent = 'Please enter some code';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/autofix`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: code })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    output.className = 'output error';
+                    output.textContent = `Error: ${data.error}`;
+                } else {
+                    output.className = 'output success';
+                    output.textContent = data.output;
+                }
+            } catch (error) {
+                output.className = 'output error';
+                output.textContent = `Request failed: ${error.message}`;
+            }
+        }
+
+        async function getHelp() {
+            const query = document.getElementById('helpQuery').value;
+            const output = document.getElementById('helpOutput');
+            
+            if (!query.trim()) {
+                output.className = 'output error';
+                output.textContent = 'Please enter a query';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/help`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    output.className = 'output error';
+                    output.textContent = `Error: ${data.error}`;
+                } else {
+                    output.className = 'output success';
+                    output.textContent = data.output;
+                }
+            } catch (error) {
+                output.className = 'output error';
+                output.textContent = `Request failed: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
